@@ -97,7 +97,7 @@ class Simulation(object):
             better = seeds[(conf, min([teamseeds[x]['Seed'] for x in r1_winners]))]['Team']
             worse = [x for x in r1_winners if x != better][0]
             r2_winners = [self.getWinner(seeds[(conf, pair[0])]['Team'], pair[1], ranks, sim.home_adj, sim.st_dev) 
-                          for pair in [(1,worse),(2,better)]]
+                          for pair in [(1, worse),(2, better)]]
             #simulate round three
             hometeam = seeds[(conf, min([teamseeds[x]['Seed'] for x in r2_winners]))]['Team']
             awayteam = [x for x in r2_winners if x != hometeam][0]
