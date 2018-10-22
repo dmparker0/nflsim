@@ -1,8 +1,8 @@
-from joblib import Parallel, delayed
 from .gamedata import getTeams, getScores, adjustScores
 from .pwr import PWRsystems
 from .tiebreak import getPlayoffSeeding
 from .regression import Regression
+from joblib import Parallel, delayed
 from scipy import stats
 import pandas as pd
 import numpy as np
