@@ -1,7 +1,7 @@
 import pandas as pd
 
 class Regression(object):
-    def __init__(self, to=0, weight=None, n_games=12, basecol='Baseline'):
+    def __init__(self, to=0, weight=None, n_games=16, basecol='Baseline'):
         self.regression_values = to
         self.regression_weight = weight
         self.num_games = n_games
