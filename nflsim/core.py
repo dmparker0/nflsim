@@ -1,7 +1,7 @@
 from .gamedata import getTeams, getScores, adjustScores
 from .pwr import PWRsystems
-from .tiebreak import getPlayoffSeeding
 from .regression import Regression
+from .tiebreak import getPlayoffSeeding
 from joblib import Parallel, delayed
 from scipy import stats
 import pandas as pd
