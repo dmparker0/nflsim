@@ -2,13 +2,15 @@ import pandas as pd
 import numpy as np
 
 class Regression(object):
-    def __init__(self, to=0, weight=None, n_games=16, basecol='Baseline'):
+    def __init__(self, to=None, weight=None, n_games=16, basecol='Baseline'):
         self.regression_values = to
         self.regression_weight = weight
         self.num_games = n_games
     
     def regress(self, df, pwrcol):
         mydf = pd.DataFrame()
+        if self.regression_values is None:
+            self.regression_values = np.mean(df[pwrcol].values)
         if type(self.regression_values) is not pd.DataFrame:
             reg_values = [self.regression_values] * df.shape[0]
             mydf = df
