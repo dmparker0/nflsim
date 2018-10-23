@@ -2,6 +2,12 @@
 
 This package simulates the NFL regular season and playoffs using a simple, customizable Monte Carlo method.
 
+### Installation
+
+```
+pip install nflsim
+```
+
 ### How it works
 
 During each simulation, nflsim uses the methods described below to assign a winner to all remaining NFL games in a given season. It then uses the NFL's complex [tiebreaking procedures] to determine playoff seeding, and the playoffs are simulated game-by-game.
