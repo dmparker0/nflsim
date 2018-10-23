@@ -4,6 +4,8 @@ This package simulates the NFL regular season and playoffs using a simple, custo
 
 ### Installation
 
+The package is on [PyPI] and can be installed with pip:
+
 ```
 pip install nflsim
 ```
@@ -156,6 +158,7 @@ simulation = nfl.Simulate(season=2018, n_sims=100000).run(combine=False)
 ```
 
 [//]: #
+   [PyPI]: <https://pypi.org/project/nflsim/>
    [SRS]: <https://www.sports-reference.com/blog/2015/03/srs-calculation-details/>
    [FPI]: <http://www.espn.com/blog/statsinfo/post/_/id/123048/a-guide-to-nfl-fpi/>
    [DVOA]: <https://www.footballoutsiders.com/info/methods#DVOA>
