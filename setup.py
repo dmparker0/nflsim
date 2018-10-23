@@ -10,5 +10,7 @@ setup(
     version='0.1',
     license='MIT',
     description='A tool for simulating the NFL regular season and playoffs',
-    #long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
+    #download_url = 'https://github.com/dmparker0/nflsim/archive/v_01.tar.gz',
+    #keywords = ['SOME', 'MEANINGFULL', 'KEYWORDS'], 
 )
