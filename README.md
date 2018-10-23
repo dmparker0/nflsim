@@ -6,7 +6,7 @@ This package simulates the NFL regular season and playoffs using a simple, custo
 
 During each simulation, nflsim uses the methods described below to assign a winner to all remaining NFL games in a given season. It then uses the NFL's complex [tiebreaking procedures] to determine playoff seeding, and the playoffs are simulated game-by-game.
 
-Before beginning the simulations, each team is assigned a power rating (PWR) with mean 0, such that a team with a PWR of 3 would be favored by 5 points vs a team with a PWR of -2 on a neutral field. By default, the base power rankings for each team are calculated using an equally-weighted combination of normalized versions of the SRS, FPI, DVOA, and Sagarin rankings. The rankings systems used and their relative weights are configurable, and custom ranking systems are supported. The individual rating systems and the combined rankings can be regressed to the mean (or to custom team-specific values) as desired.
+Before beginning the simulations, each team is assigned a power rating (PWR) with mean 0, such that a team with a PWR of 3 would be favored by 5 points vs a team with a PWR of -2 on a neutral field. By default, the base power rankings for each team are calculated using an equally-weighted combination of normalized versions of the [SRS], [FPI], [DVOA], and [Sagarin] rankings. The rankings systems used and their relative weights are configurable, and custom ranking systems are supported. The individual rating systems and the combined rankings can be regressed to the mean (or to custom team-specific values) as desired.
 
 The team PWR rankings are adjusted at the beginning of each season simulation by a random amount, determined using a normal distribution with mean 0 and a user-provided standard deviation (2 points by default):
 ```
@@ -145,6 +145,10 @@ simulation = nflsim.Sim(season=2018, n_sims=100000).run(combine=False)
 ```
 
 [//]: #
+   [SRS]: <https://www.sports-reference.com/blog/2015/03/srs-calculation-details/>
+   [FPI]: <http://www.espn.com/blog/statsinfo/post/_/id/123048/a-guide-to-nfl-fpi/>
+   [DVOA]: <https://www.footballoutsiders.com/info/methods#DVOA>
+   [Sagarin]: <https://www.usatoday.com/sports/nfl/sagarin/2018/rating/>
    [tiebreaking procedures]: <https://operations.nfl.com/the-rules/nfl-tiebreaking-procedures/>
    [3 points by default]: <http://www.espn.com/nfl/story/_/id/20371914/home-field-advantage-nfl-2017-toughest-easiest-teams-play-road-more>
    [13 points by default]: <https://www.pro-football-reference.com/about/win_prob.htm>
