@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 
 class Sim(object):
-    def __init__(self, season, n_sims, pwr_systems=None, rank_adj=2, home_adj=3, st_dev=13, auto_init=True):
+    def __init__(self, season, n_sims, pwr_systems=None, rank_adj=2, home_adj=3, st_dev=13):
         self.season = season
         self.n_sims = n_sims
         self.rank_adj = rank_adj
@@ -18,10 +18,6 @@ class Sim(object):
             self.pwr_systems = PWRsystems()
         else:
             self.pwr_systems = pwr_systems
-        if auto_init:
-            self.initialize()
-            
-    def initialize(self):
         self.teams = getTeams(self.season)
         self.scores = getScores(self.season)
         self.played = self.scores[self.scores['HomePts'].notnull()]
@@ -33,7 +29,6 @@ class Sim(object):
             self.regress(system)
         self.pwr = self.pwr_systems.combine()
         self.regress(self.pwr)
-        return self
 
     def run(self, parallel=True, combine=True):
         simulations = []
