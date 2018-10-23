@@ -7,7 +7,7 @@ from scipy import stats
 import pandas as pd
 import numpy as np
 
-class Sim(object):
+class Simulate(object):
     def __init__(self, season, n_sims, pwr_systems=None, rank_adj=2, home_adj=3, st_dev=13):
         self.season = season
         self.n_sims = n_sims
