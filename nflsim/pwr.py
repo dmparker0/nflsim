@@ -147,7 +147,7 @@ class PWRsystems(object):
     def __init__(self, regress_to=None, custom=False, srs=None, fpi=None, dvoa=None, sagarin=None, others=None):
         self.regress_to = regress_to
         self.systems = []
-        if not custom:
+        if (srs is None) and (fpi is None) and (dvoa is None) and (sagarin is None) and (others is None):
             self.systems.append(SRS())
             self.systems.append(FPI())
             self.systems.append(DVOA())
