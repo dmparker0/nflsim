@@ -135,9 +135,10 @@ Some results are aggregated by default, and can be accessed directly from the Si
 playoff_df = simulation.playoffs
 ```
 
-You can also view the aggregated season data (contains average wins + PWR for each team) as a DataFrame using the "standings" property:
+You can also view and export the aggregated season data (contains average wins + PWR for each team) as a DataFrame using the "standings" property:
 ```python
 standings_df = simulation.standings
+standings_df.to_csv('C:/Users/example/Documents/standings.csv', index=False)
 ```
     
 By default, run() will use the joblib package to run the simulations in parallel; this can be overridden by setting parallel=False:
