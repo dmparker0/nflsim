@@ -107,7 +107,7 @@ systems = nflsim.PWRsystems(regress_to=regression, srs=True, dvoa=nflsim.DVOA(we
 
 ##### Execution and Analysis
 
-Once you've set up your Sim object, use run() to execute the simulation.
+Once you've set up your Simulate object, use run() to execute the simulation.
 ```python
 regression = nflsim.Regression(n_games=10)
 systems = nflsim.PWRsystems(srs=nflsim.SRS(regress_to=regression), fpi=True, dvoa=nflsim.DVOA(weight=2))
@@ -115,7 +115,7 @@ simulation = nflsim.Simulate(season=2018, n_sims=10000, pwr_systems=systems)
 simulation.run()
 ```
     
-The run() method will return a reference to the Sim object, so this syntax is also acceptable:
+The run() method will return a reference to the Simulate object, so this syntax is also acceptable:
 ```python
 simulation = nflsim.Simulate(season=2018, n_sims=10000, pwr_systems=systems).run()
 ```
@@ -130,7 +130,7 @@ for sim in simulation.simulations.values:
     playoffs = sim.playoffs
 ```
     
-Some results are aggregated by default, and can be accessed directly from the Sim object. You can view the aggregated playoff results (contains seed information + playoff winners) as a DataFrame using the "playoffs" property:
+Some results are aggregated by default, and can be accessed directly from the Simulate object. You can view the aggregated playoff results (contains seed information + playoff winners) as a DataFrame using the "playoffs" property:
 ```python
 playoff_df = simulation.playoffs
 ```
