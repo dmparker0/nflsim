@@ -20,8 +20,8 @@ class Simulate(object):
             self.pwr_systems = pwr_systems
         self.teams = getTeams(self.season)
         self.scores = getScores(self.season)
-        self.played = self.scores[self.scores['HomePts'].notnull()]
-        self.unplayed = self.scores[~self.scores['HomePts'].notnull()]
+        self.played = self.scores[self.scores['Played']][['Home','Away','HomePts','AwayPts']]
+        self.unplayed = self.scores[~self.scores['Played']][['Home','Away','HomePts','AwayPts']]
         played_adj = adjustScores(self.played, self.home_adj)
         for system in self.pwr_systems.systems:
             system.calculate(gamelog=played_adj, season=self.season)
@@ -43,7 +43,7 @@ class Simulate(object):
             self.playoffs = self.simulations.playoffs
             self.standings = self.simulations.standings
         return self
-
+            
     def simulate(self):
         return Simulation(self)
 
@@ -57,8 +57,11 @@ class Simulation(object):
     def __init__(self, sim):
         self.rankings = sim.pwr.values.copy()
         self.rankings['PWR'] = self.rankings['PWR'].values - np.random.normal(0, sim.rank_adj, self.rankings.shape[0])
-        simulated = self.simulateSeason(sim)
-        self.regularseason = pd.concat([sim.played, simulated])
+        if not sim.unplayed.empty:
+            simulated = self.simulateSeason(sim)
+            self.regularseason = pd.concat([sim.played, simulated])
+        else:
+            self.regularseason = sim.played
         adjusted = adjustScores(self.regularseason, sim.home_adj)
         mapper = {'Team':'Opponent','Conference':'OppConference','Division':'OppDivision'}
         df = pd.merge(pd.merge(adjusted, sim.teams, on='Team'), sim.teams.rename(mapper, axis=1), on='Opponent')
