@@ -7,7 +7,7 @@ def resolveWinPercentage(gamelog):
     return resolveMaxWins(grouped, 'Wins', 'Losses')
 
 def resolveScheduleStrength(gamelog):
-    grouped = gamelog.groupby(['Team','Opponent Total Wins','Opponent Total Losses']).first().reset_index()
+    grouped = gamelog.drop_duplicates(['Team','Opponent Total Wins','Opponent Total Losses'])
     return resolveMaxWins(grouped, 'Opponent Total Wins', 'Opponent Total Losses')
 
 def resolveMaxWins(df, wincol, losscol):
