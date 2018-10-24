@@ -33,9 +33,10 @@ def getScores(year):
     ishome = (df['At'].values != '@')
     df['Home'] = np.where(ishome, df['Winner'].values, df['Loser'].values)
     df['Away'] = np.where(ishome, df['Loser'].values, df['Winner'].values)
-    df['HomePts'] = np.where(ishome, df['PtsW'].values, df['PtsL'].values)
-    df['AwayPts'] = np.where(ishome, df['PtsL'].values, df['PtsW'].values)
-    return df[['Home','Away','HomePts','AwayPts']]
+    df['Played'] = df['PtsW'].notnull()
+    df['HomePts'] = np.nan_to_num(np.where(ishome, df['PtsW'].values, df['PtsL'].values).astype(float)).astype(int)
+    df['AwayPts'] = np.nan_to_num(np.where(ishome, df['PtsL'].values, df['PtsW'].values).astype(float)).astype(int)
+    return df[['Home','Away','HomePts','AwayPts','Played']]
 
 #cleans game log + mirrors stats for each game so that each appears twice
 #game will appear once with team A as 'Team' and team B as 'Opponent' + once vice versa
@@ -43,7 +44,6 @@ def adjustScores(gamelog, home_adj):
     df = pd.DataFrame([x + [True]  for x in gamelog[['Home','Away','HomePts','AwayPts']].values.tolist()] +
                       [x + [False] for x in gamelog[['Away','Home','AwayPts','HomePts']].values.tolist()], 
                       columns= ['Team','Opponent','Points','OppPoints','IsHome'])
-    df[['Points','OppPoints']] = df[['Points','OppPoints']].apply(pd.to_numeric)
     difference = df['Points'].values - df['OppPoints'].values
     wins = (np.sign(difference) + 1) / 2
     df['Difference'] = difference - np.where(df['IsHome'].values, home_adj, -1 * home_adj)
