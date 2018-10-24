@@ -132,7 +132,7 @@ class Sagarin(PWR):
         tbltext = html.select('section[id=section_sports]')[0].text
         tbltext = tbltext.replace('nbsp','').replace('\xa0','')
         tbltext = tbltext.replace('49ers','XXers')
-        tbltext = extractText(tbltext, delim_left='_NFL', delim_right='__')
+        tbltext = extractText(tbltext, delim_left='HOME ADVANTAGE=', delim_right='__')
         tbltext = extractText(tbltext, delim_left=']&', delim_right='')
         tbltext = ''.join([x for x in tbltext if x not in ['&','(',')','|']])
         pattern = re.compile('([a-zA-Z ]+[ ])[=]([^a-zA-Z]*)')
