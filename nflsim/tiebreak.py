@@ -13,30 +13,24 @@ def resolveScheduleStrength(gamelog):
 def resolveMaxWins(df, wincol, losscol):
     percent = (df[wincol].values / (df[wincol].values + df[losscol].values)).round(10)
     ismax = (percent == percent.max())
-    return df[ismax]['Team'].tolist()
+    return df[ismax]['Team'].values
 
 def resolveH2HSweep(gamelog):
-    teams = list(set(gamelog['Team'].values))
+    teams = set(gamelog['Team'].values)
     if len(teams) == 2:
         return resolveWinPercentage(gamelog)
     grouped = gamelog.groupby(['Team']).agg({'Wins':'sum','Losses':'sum'}).reset_index()
     undefeated = grouped['Wins'].values == (len(teams) - 1)
-    swept = grouped['Losses'].values == (len(teams) - 1)
     if undefeated.sum() > 0:
-        return grouped[undefeated]['Team'].tolist()
-    elif swept.sum() > 0:
-        return grouped[~swept]['Team'].tolist()
-    else:
-        return teams
+        return grouped[undefeated]['Team'].values
+    swept = grouped['Losses'].values == (len(teams) - 1)
+    if swept.sum() > 0:
+        return grouped[~swept]['Team'].values
+    return list(teams)
 
 def getCommonOpponents(gamelog, teams):
-    teamgames = gamelog[gamelog['Team'].isin(teams)]
-    opplists = teamgames.groupby('Team')['Opponent'].apply(list).reset_index()
-    opponents = opplists['Opponent'].values
-    if len(opponents) > 0:
-        return list(set.intersection(*[set(lst) for lst in opponents]))
-    else:
-        return []
+    teamgames = gamelog[gamelog['Team'].isin(teams)].groupby('Team')
+    return set.intersection(*[set(g['Opponent'].values) for t, g in teamgames])
 
 #define filters
 def teamfilter(df, lst):
@@ -46,8 +40,8 @@ def h2hfilter(df, lst):
     return teamfilter(df, lst) & df['Opponent'].isin(lst)
 
 def sweepfilter(df, lst):
-    grouped = df[h2hfilter(df, lst)].groupby(['Team','Opponent'])
-    return (len(grouped) == (len(lst) * (len(lst) -1))) & h2hfilter(df, lst)
+    n_groups = len(df[h2hfilter(df, lst)].groupby(['Team','Opponent']))
+    return (n_groups == (len(lst) * (len(lst) - 1))) & h2hfilter(df, lst)
 
 def divisionfilter(df, lst):
     return teamfilter(df, lst) & (df['Division'] == df['OppDivision'])
@@ -69,58 +63,48 @@ def victoryfilter(df, lst):
     return teamfilter(df, lst) & (df['Wins'] == 1)
 
 #define tiebreaker steps
-divsteps = [(h2hfilter, resolveWinPercentage), 
-            (divisionfilter, resolveWinPercentage), 
-            (cgfilter_min1, resolveWinPercentage), 
-            (conferencefilter, resolveWinPercentage), 
-            (victoryfilter, resolveScheduleStrength), 
-            (teamfilter, resolveScheduleStrength)]
-wcsteps =  [(sweepfilter, resolveH2HSweep), 
-            (conferencefilter, resolveWinPercentage), 
-            (cgfilter_min4, resolveWinPercentage), 
-            (victoryfilter, resolveScheduleStrength), 
-            (teamfilter, resolveScheduleStrength)]
-            
-#returns playoff teams + seeds
-def getPlayoffSeeding(gamelog):
-    divwinners = getDivisionWinners(gamelog)
-    wildcards = getWildCards(gamelog, divwinners)
-    return pd.DataFrame(divwinners + wildcards) 
+divsteps = [{'Filter':x[0], 'Resolution':x[1]} for x in 
+                [(h2hfilter, resolveWinPercentage), 
+                (divisionfilter, resolveWinPercentage), 
+                (cgfilter_min1, resolveWinPercentage), 
+                (conferencefilter, resolveWinPercentage), 
+                (victoryfilter, resolveScheduleStrength), 
+                (teamfilter, resolveScheduleStrength)]]
+                
+wcsteps =  [{'Filter':x[0], 'Resolution':x[1]} for x in 
+                [(sweepfilter, resolveH2HSweep), 
+                (conferencefilter, resolveWinPercentage), 
+                (cgfilter_min4, resolveWinPercentage), 
+                (victoryfilter, resolveScheduleStrength), 
+                (teamfilter, resolveScheduleStrength)]]
 
-#applies tiebreaker rules to determine division winners and set 1-4 seeds for each conference
-def getDivisionWinners(gamelog):
+def getPlayoffSeeding(gamelog):
     teamwins = gamelog.groupby(['Team','Division'])['Wins'].sum()
     topteams = teamwins[teamwins.groupby('Division').rank(method='min', ascending=False).values == 1]
-    winners = []
+    divwinners = set()
     for d, g in topteams.groupby('Division'):
-        winners.append(breakDivisionalTie(gamelog, [{'Team':t,'Division':d} for t in g.index.get_level_values('Team').values]))
-    return getSeeds(gamelog, [1,2,3,4], winners)
+        divwinners.add(breakDivisionalTie(gamelog, [{'Team':t,'Division':d} for t in g.index.get_level_values('Team').values]))
+    remainingteams = set(gamelog['Team'].values) - divwinners
+    return pd.DataFrame(getSeeds(gamelog, ([1,2,3,4], [5,6]), (divwinners, remainingteams)))
 
-#applies tiebreaker rules to determine wildcards and set 5-6 seeds for each conference
-def getWildCards(gamelog, divisionwinners):
-    return getSeeds(gamelog, [5,6], list(set(gamelog['Team'].values) - set([x['Team'] for x in divisionwinners])))
-
-#applies tiebreaker rules to determine seeding of a group of teams
-#division winners and wildcards are processed separately (division winners go first)
-def getSeeds(gamelog, seeds, teams):
-    teamwins = gamelog.groupby(['Team','Conference','Division'])['Wins'].sum()
+def getSeeds(gamelog, seed_groups, winner_groups):
+    wins = gamelog.groupby(['Team','Conference','Division'])['Wins'].sum()
     seeding = []
-    for conf, g in teamwins[np.isin(teamwins.index.get_level_values('Team').values, teams)].groupby('Conference'):
-        winners = set()
-        c_rank = g.rank(method='min', ascending=False).values
-        for i, seed in enumerate(seeds):
-            indices = [{'Team':t, 'Division':d} for t, c, d in g[c_rank <= i + 1].index.tolist() if t not in winners]
-            winner = breakWildCardTie(gamelog, indices)
-            winners.add(winner)
-            seeding.append({'Conference':conf,'Team':winner,'Seed':seed})
+    for conf, g in wins.groupby('Conference'):
+        for sg, seed_group in enumerate(seed_groups):
+            filtered = g[[x in winner_groups[sg] for x in g.index.get_level_values('Team').values]]
+            c_rank = filtered.rank(method='min', ascending=False).values
+            for s, seed in enumerate(seed_group):
+                indices = [x for x in filtered[c_rank <= s + 1].index.values if x[0] not in [x['Team'] for x in seeding]]
+                winner = breakWildCardTie(gamelog, [{'Team':t, 'Division':d} for t, c, d in indices])
+                seeding.append({'Conference':conf,'Team':winner,'Seed':seed})
     return seeding
 
 #breaks ties using divisional rules
 def breakDivisionalTie(gamelog, tiedteams):
     if len(tiedteams) == 1:
         return tiedteams[0]['Team']
-    steps = [{'Filter':x[0], 'Resolution':x[1]} for x in divsteps]
-    return breakTies(gamelog, steps, tiedteams, breakDivisionalTie)
+    return breakTies(gamelog, divsteps, tiedteams, breakDivisionalTie)
     
 #breaks ties using wildcard rules
 def breakWildCardTie(gamelog, tiedteams):
@@ -130,8 +114,7 @@ def breakWildCardTie(gamelog, tiedteams):
     currentteams = set()
     for division in divisions:
         currentteams.add(breakDivisionalTie(gamelog, [x for x in tiedteams if x['Division'] == division]))
-    steps = [{'Filter':x[0], 'Resolution':x[1]} for x in wcsteps]
-    return breakTies(gamelog, steps, [x for x in tiedteams if x['Team'] in currentteams], breakWildCardTie)
+    return breakTies(gamelog, wcsteps, [x for x in tiedteams if x['Team'] in currentteams], breakWildCardTie)
 
 #breaks ties between 2 or more teams by applying an ordered list of filters/functions to a game log
 def breakTies(gamelog, steps, tiedteams, caller):
