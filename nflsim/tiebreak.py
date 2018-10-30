@@ -63,20 +63,18 @@ def victoryfilter(df, lst):
     return teamfilter(df, lst) & (df['Wins'] == 1)
 
 #define tiebreaker steps
-divsteps = [{'Filter':x[0], 'Resolution':x[1]} for x in 
-                [(h2hfilter, resolveWinPercentage), 
-                (divisionfilter, resolveWinPercentage), 
-                (cgfilter_min1, resolveWinPercentage), 
-                (conferencefilter, resolveWinPercentage), 
-                (victoryfilter, resolveScheduleStrength), 
-                (teamfilter, resolveScheduleStrength)]]
-                
-wcsteps =  [{'Filter':x[0], 'Resolution':x[1]} for x in 
-                [(sweepfilter, resolveH2HSweep), 
-                (conferencefilter, resolveWinPercentage), 
-                (cgfilter_min4, resolveWinPercentage), 
-                (victoryfilter, resolveScheduleStrength), 
-                (teamfilter, resolveScheduleStrength)]]
+divsteps = [{'Filter':h2hfilter, 'Resolution':resolveWinPercentage},
+            {'Filter':divisionfilter, 'Resolution':resolveWinPercentage},
+            {'Filter':cgfilter_min1, 'Resolution':resolveWinPercentage},
+            {'Filter':conferencefilter, 'Resolution':resolveWinPercentage},
+            {'Filter':victoryfilter, 'Resolution':resolveScheduleStrength},
+            {'Filter':teamfilter, 'Resolution':resolveScheduleStrength}]
+
+wcsteps  = [{'Filter':sweepfilter, 'Resolution':resolveH2HSweep},
+            {'Filter':conferencefilter, 'Resolution':resolveWinPercentage},
+            {'Filter':cgfilter_min4, 'Resolution':resolveWinPercentage},
+            {'Filter':victoryfilter, 'Resolution':resolveScheduleStrength},
+            {'Filter':teamfilter, 'Resolution':resolveScheduleStrength}]
 
 def getPlayoffSeeding(gamelog):
     teamwins = gamelog.groupby(['Team','Division'])['Wins'].sum()
