@@ -143,12 +143,7 @@ seeding = sim.seeding()
 playoffs = sim.playoffs()
 ```
 
-By default, all of the aggregated dataframes use MultiIndexes incorporating the simulation number and the within-simulation row number. As a result, it is relatively straightforward to join one view of the results to another:
-```python
-joined = sim.simulations.regularseason.join(sim.simulations.playoffs, on=['Simulation'], how='inner')
-```
-
-For situations not involving joins, the class methods include an option to extract the "Simulation" portion of the MultiIndex into its own column:
+By default, all of the aggregated dataframes use MultiIndexes incorporating the simulation number and the within-simulation row number. The class methods include an option to extract the "Simulation" portion of the MultiIndex into its own column:
 ```python
 standings_reindexed = sim.standings(reindex=True)
 ```
