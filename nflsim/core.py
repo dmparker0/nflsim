@@ -1,9 +1,9 @@
 from .gamedata import getTeams, getScores, adjustScores
 from .pwr import PWRsystems
 from .regression import Regression
+from .simulate import simulateBracket, simulateGame, simulateGamelog
 from .teams import Team, Teams
 from .tiebreak import getPlayoffSeeding
-from .tournament import simulateBracket, simulateGame, simulateGamelog
 from .util import playoff_game_ids
 from joblib import Parallel, delayed
 import pandas as pd
