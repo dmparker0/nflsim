@@ -121,40 +121,47 @@ The run() method will return a reference to the Simulate object, so this syntax 
 ```python
 simulation = nfl.Simulate(season=2018, n_sims=10000, pwr_systems=systems).run()
 ```
-    
-Once the simulation has been executed, you can view the detailed results by iterating through a list of Simulation objects. Each Simulation object contains a number of separate DataFrames containing data from the simulation in question:
-```python
-for sim in simulation.simulations.values:
-    standings = sim.standings
-    adjusted_pwr = sim.rankings
-    regularseason = sim.regularseason
-    seeding = sim.seeding
-    playoffs = sim.playoffs
-```
-    
-Some results are aggregated by default, and can be accessed directly from the Simulate object. You can view the aggregated playoff results (contains seed information + playoff winners) as a DataFrame using the "playoffs" property:
-```python
-playoff_df = simulation.playoffs
-```
-
-You can also view and the aggregated season data (contains average wins + PWR for each team) as a DataFrame using the "standings" property:
-```python
-standings_df = simulation.standings
-```
-
-Because the standings and playoff results are DataFrames, they can be easily exported to .csv:
-```python
-standings_df.to_csv('C:/Users/example/Documents/standings.csv', index=False)
-```
 
 By default, run() will use the joblib package to run the simulations in parallel; this can be overridden by setting parallel=False:
 ```python
 simulation = nfl.Simulate(season=2018, n_sims=100).run(parallel=False)
 ```
     
-If you prefer to generate your own aggregate statistics, you can disable the automatic generation of the aggregated "playoffs" and "standings" properties by setting combine=False:
+Once the simulation has executed, the results are aggregated and stored in several related dataframes. These can either be directly accessed using the simulations property:
 ```python
-simulation = nfl.Simulate(season=2018, n_sims=100000).run(combine=False)
+standings = sim.simulations.standings
+regularseason = sim.simulations.regularseason
+seeding = sim.simulations.seeding
+playoffs = sim.simulations.playoffs
+```
+
+Or returned as copies using class methods:
+```python
+standings = sim.standings()
+regularseason = sim.regularseason()
+seeding = sim.seeding()
+playoffs = sim.playoffs()
+```
+
+By default, all of the aggregated dataframes use MultiIndexes incorporating the simulation number and the within-simulation row number. As a result, it is relatively straightforward to join one view of the results to another:
+```python
+joined = sim.simulations.regularseason.join(sim.simulations.playoffs, on=['Simulation'], how='inner')
+```
+
+For situations not involving joins, the class methods include an option to extract the "Simulation" portion of the MultiIndex into its own column:
+```python
+standings_reindexed = sim.standings(reindex=True)
+```
+
+You can also entirely disable the generation of aggregated statistics, in which case the results are stored as a list of Simulation objects:
+```python
+sim = nfl.Simulate(season=2018, n_sims=100000).run(combine=False)
+for simulation in sim.simulations.values:
+    rankings = simulation.rankings
+    standings = simulation.standings
+    regularseason = simulation.regularseason
+    seeding = simulation.seeding
+    playoffs = simulation.playoffs
 ```
 
 [//]: #
