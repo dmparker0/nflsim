@@ -8,10 +8,10 @@ def simulateGamelog(gamelog, rankings, home_adj, st_dev, tie_fraction=0.0):
     merged = pd.merge(gamelog, rankings.rename({'Team':'Home'}, axis=1), on='Home').rename({'PWR':'Home PWR'}, axis=1)
     merged = pd.merge(merged, rankings.rename({'Team':'Away'}, axis=1), on='Away').rename({'PWR':'Away PWR'}, axis=1)
     dist = stats.norm((merged['Home PWR'].values + home_adj) - merged['Away PWR'].values, st_dev)
-    test_val = 1 - dist.cdf(0.5)
+    test_vals = 1 - dist.cdf(0.5)
     random_vals = np.random.random((3, merged.shape[0]))
-    home_win = random_vals[0] < test_val
-    regulation_tie = np.logical_and(test_val < random_vals[0], 1 - dist.cdf(-0.5) > random_vals[0])
+    home_win = random_vals[0] < test_vals
+    regulation_tie = np.logical_and(test_vals < random_vals[0], 1 - dist.cdf(-0.5) > random_vals[0])
     ot_result = np.where(random_vals[1] < tie_fraction, [0.5] * merged.shape[0], random_vals[2] < 1 - dist.cdf(0))
     merged['Home Wins'] = np.where(home_win, home_win, np.where(regulation_tie, ot_result, regulation_tie))
     merged['Away Wins'] = 1 - merged['Home Wins'].values
