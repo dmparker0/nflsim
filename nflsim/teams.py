@@ -10,14 +10,14 @@ class Team(object):
         self.seed = seed
 
 class Teams(object):
-    def __init__(self, values):
+    def __init__(self, values, indexed=False):
         if type(values) is DataFrame:
             teamdict = values.to_dict('records')
             self.values = [Team(name=x['Team'], conf=x['Conference'], div=x['Division'], 
                                 pwr=x['PWR'], seed=x['Seed']) for x in teamdict]
         else:
             self.values = values
-        self.indexed = False
+        self.indexed = indexed
 
     def index(self, name=False, conf=False, div=False, seed=False):
         attrs = ['name','conference','division','seed']
@@ -39,17 +39,12 @@ class Teams(object):
         return self
 
     def copy(self, reset_index=True):
-        if reset_index:
-            if self.indexed:
-                copied = Teams([x for y in [x for i, x in self.items()] for x in y])
-            else:
-                copied = Teams(self.values)
-            copied.indexed = False
-            return copied
+        if not reset_index:
+            return Teams(self.values, indexed=self.indexed)
+        elif self.indexed:
+            return Teams([x for y in [x for i, x in self.items()] for x in y])
         else:
-            teams = Teams(self.values)
-            teams.indexed = self.indexed
-            return teams
+            return Teams(self.values)            
 
     def len(self):
         return len(self.values)
