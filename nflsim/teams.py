@@ -25,16 +25,15 @@ class Teams(object):
         indices = list(compress(attrs, bools))
         multi_index = len(indices) != 1
         val_dict = {}
-        if len(indices) == 1:
-            for team in self.values:
-                if multi_index:
-                    key = tuple([getattr(team, x) for x in indices])
-                else:
-                    key = getattr(team, indices[0])
-                if key in val_dict:
-                    val_dict[key] = val_dict[key] + [team]
-                else:
-                    val_dict[key] = [team]
+        for team in self.values:
+            if multi_index:
+                key = tuple([getattr(team, x) for x in indices])
+            else:
+                key = getattr(team, indices[0])
+            if key in val_dict:
+                val_dict[key] = val_dict[key] + [team]
+            else:
+                val_dict[key] = [team]
         self.values = val_dict
         self.indexed = True
         return self
