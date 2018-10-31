@@ -47,7 +47,9 @@ class Teams(object):
             copied.indexed = False
             return copied
         else:
-            return Teams(self.values)
+            teams = Teams(self.values)
+            teams.indexed = self.indexed
+            return teams
 
     def len(self):
         return len(self.values)
