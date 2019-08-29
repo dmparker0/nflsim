@@ -1,130 +1,130 @@
-# smm2sim
+# nflsim
 
-This package simulates the GSA Mario Maker 2 Endless Expert League regular season and playoffs using a simple, customizable Monte Carlo method.
+This package simulates the NFL regular season and playoffs using a simple, customizable Monte Carlo method.
 
 ### Installation
 
 The package is on [PyPI] and can be installed with pip:
 
 ```
-pip install smm2sim
+pip install nflsim
 ```
 
 ### How it works
 
-During each simulation, smm2sim uses the methods described below to assign a winner to all remaining matches in the season. It then calculates seasonal point totals and breaks ties to determine playoff seeding, and the playoffs are simulated match-by-match.
+During each simulation, nflsim uses the methods described below to assign a winner to all remaining NFL games in a given season. It then uses the NFL's complex [tiebreaking procedures] to determine playoff seeding, and the playoffs are simulated game-by-game.
 
-Before beginning the simulations, each player is assigned a power rating (PWR), such that a player with a PWR of 8 would be expected to score an average of 8 points in a 15 minute match. By default, the base power rankings for each player a simple average of their past results (excluding points scored during tiebreakers/sudden death). Custom ranking systems are also supported, which can be combined with the default ratings or replace them entirely. The individual rating systems and the combined rankings can be regressed to the mean (or to custom player-specific values) as desired.
+Before beginning the simulations, each team is assigned a power rating (PWR) with mean 0, such that a team with a PWR of 3 would be favored by 5 points vs a team with a PWR of -2 on a neutral field. By default, the base power rankings for each team are calculated using an equally-weighted combination of normalized versions of the [SRS], [FPI], [DVOA], and [Sagarin] rankings. The rankings systems used and their relative weights are configurable, and custom ranking systems are supported. The individual rating systems and the combined rankings can be regressed to the mean (or to custom team-specific values) as desired.
 
-The player PWR rankings are adjusted at the beginning of each season simulation by a random amount, determined using a normal distribution with mean 0 and a user-provided standard deviation (1 point by default):
+The team PWR rankings are adjusted at the beginning of each season simulation by a random amount, determined using a normal distribution with mean 0 and a user-provided standard deviation (2 points by default):
 ```
 adjusted_pwr = [PWR] - numpy.random.normal(0, [rank_adj])
 ```
     
-This adjustment represents the uncertainty in each player's base PWR projection, which includes both model error and potential player skill changes. Higher values equate to more variance in outcomes.
+This adjustment represents the uncertainty in each team's base PWR projection, which includes both model error and injury risk. Higher values equate to more variance in outcomes.
 
-Each match consists of 3 simulated games. When simulating a game, player A's PWR is compared to player B's PWR. The resulting point differential is used to generate a normal cumulative distribution function, which estimates player A's probability of winning the game. This win probability is compared to a random number to determine the simulated winner of the game:
+When simulating a game, the home team's PWR is adjusted upwards by a fixed amount and compared to the away team's PWR. The resulting point differential is used to generate a normal cumulative distribution function, which determines the home team's probability of winning the game. This win probability is compared to a random number to determine the simulated winner of the game:
 ```
-pwr_difference = [PWR A] - [PWR B]
-win_probability = 1 - scipy.stats.norm(pwr_difference, [stdev]).cdf(0)
-is_winner = numpy.random.random() < win_probability
+home_pwr_difference = ([Home PWR] + [Home Adj]) - [Away PWR]
+home_win_probability = 1 - scipy.stats.norm(home_pwr_difference, [stdev]).cdf(0)
+is_home_winner = numpy.random.random() < home_win_probability
 ```
 
-The standard deviation used to generate the normal distribution ([2.5 points by default]) is configurable.
+Both the home adjustment ([3 points by default]) and the standard deviation used to generate the normal distribution ([13 points by default]) are configurable.
 
 ### Usage
 
 ##### Basics
 
-Each simulation is controlled by a Simulate object. You create an object by specifying the number of simulations:
+Each simulation is controlled by a Simulate object. You create an object by specifying the season to simulate and the number of simulations:
 ```python
-import smm2sim as smm2
-simulation = smm2.Simulate(n_sims=10000)
+import nflsim as nfl
+simulation = nfl.Simulate(season=2018, n_sims=10000)
 ```
     
-If desired, you can customize the values of the PWR rank adjustment used at the beginning of each simulation and the standard deviation used when simulating individual games:
+If desired, you can customize the values for home-field advantage, the PWR rank adjustment used at the beginning of each simulation, and the standard deviation used when simulating individual games:
 ```python
-simulation = smm2.Simulate(n_sims=10000, rank_adj=1, st_dev=2.5)
+simulation = nfl.Simulate(season=2018, n_sims=10000, rank_adj=3, home_adj=2.5, st_dev=13.5)
 ```    
 ##### PWRsystems
     
-You can customize how the power rankings are generated by creating a PWRsystems object. You create an object by indicating which systems to include; the built-in system is called "srs":
+You can customize how the power rankings are generated by creating a PWRsystems object. You create an object by indicating which systems to include:
 ```python
-systems = smm2.PWRsystems(srs=True)
-simulation = smm2.Simulate(n_sims=10000, pwr_systems=systems)
+systems = nfl.PWRsystems(dvoa=True, fpi=True, sagarin=True)
+simulation = nfl.Simulate(season=2018, n_sims=10000, pwr_systems=systems)
 ```
 
-You can also use your own rating system by creating a generic PWR object and passing it a pandas DataFrame containing the custom rankings. The DataFrame must include one column called 'Player' containing the name of each player (case sensitive) and another column containing the rankings. The name of the ranking column should be unique from those of the other systems being used (so don't use "SRS"):
+The weights for each system (default = 1) can be specified using the built-in objects for each system (SRS, DVOA, FPI, and Sagarin):
 ```python
-my_sys_df = pd.DataFrame([{'Player':'A','Power':7},{'Player':'B','Power':5}])
-my_sys = smm2.PWR(values=my_sys_df)
-systems = smm2.PWRsystems(others=my_sys)
+systems = nfl.PWRsystems(srs=True, dvoa=nfl.DVOA(weight=2), fpi=nfl.FPI(weight=1.5))
 ```
 
-You can also combine multiple systems. The weights for each system (default = 1) can be specified using the built-in objects for each system:
+You can also incorporate your own rating system by creating a generic PWR object and passing it a pandas DataFrame containing the custom rankings. The DataFrame must include one column called 'Team' containing the full team names and another column containing the team rankings. The name of the ranking column should be unique from those of the other systems being used (so don't use "FPI" or "SRS"):
 ```python
-my_sys_df = pandas.DataFrame([{'Player':'A','Power':7},{'Player':'B','Power':5}])
-my_sys = smm2.PWR(weight=1, values=my_sys_df)
-systems = smm2.PWRsystems(srs=smm2.SRS(weight=2), others=my_sys)
+my_sys_df = pandas.DataFrame([{'Team':'A','Power':-2},{'Team':'B','Power':5}])
+my_sys = nfl.PWR(weight=2, values=my_sys_df)
+systems = nfl.PWRsystems(srs=True, others=my_sys)
 ```
 
-To use multiple custom systems, pass a list of PWR objects instead of a single PWR object:
+To use multiple custom systems, pass a list of DataFrames instead of a single DataFrame:
 ```python
-df1 = pd.DataFrame([{'Player':'A','Power1':7},{'Player':'B','Power1':5}])
-df2 = pd.DataFrame([{'Player':'A','Power2':2},{'Player':'B','Power2':6}])
-my_sys_1 = smm2.PWR(weight=2, values=df1)
-my_sys_2 = smm2.PWR(weight=1.5, values=df2)
-systems = smm2.PWRsystems(srs=True, others=[my_sys_1, my_sys_2])
+df1 = pandas.DataFrame([{'Team':'A','Power':-2},{'Team':'B','Power':5}])
+df2 = pandas.DataFrame([{'Team':'A','Power':0},{'Team':'B','Power':2}])
+my_sys_1 = nfl.PWR(weight=2, values=df1)
+my_sys_2 = nfl.PWR(weight=1.5, values=df2)
+systems = nfl.PWRsystems(srs=True, others=[my_sys_1, my_sys_2])
 ```
 
 ##### Regression
 
 Optionally, you can choose to regress the ratings generated by each system by creating a Regression object (if regress_to is omitted, no regression will be used). By default, PWR values will be regressed to the sample mean:
 ```python
-my_sys = smm2.SRS(weight=2, regress_to=smm2.Regression())
+my_sys = nfl.SRS(weight=2, regress_to=nfl.Regression())
 ```
 
 You can use fixed weighting by specifying a decimal between 0 and 1, or variable weighting based on the percentage of a specified number of games played (the default option):
 ```python
 #(PWR * 0.75) + (sample_mean * 0.25)
-regression_fixed = smm2.Regression(weight=0.25)
-#((PWR * games_played) + (sample_mean * max(0, 12 - games_played))) / max(12, games_played)
-regression_variable = smm2.Regression(n_games=12)
+regression_fixed = nfl.Regression(weight=0.25)
+#((PWR * games_played) + (sample_mean * max(0, 10 - games_played))) / max(10, games_played)
+regression_variable = nfl.Regression(n_games=10)
 ```
     
 You can regress PWR to a fixed value rather than using the sample mean:
 ```python
-regression = smm2.Regression(to=0, weight=0.5)
+regression = nfl.Regression(to=0, weight=0.5)
 ```
     
-You can also specify a custom regression value for each player using a pandas DataFrame. The DataFrame must contain one column called 'Player' containing the player names (case sensitive) and another called 'Baseline' for the regression values:
+You can also specify a custom regression value for each team using a pandas DataFrame. The DataFrame must contain one column called 'Team' containing the full team names and another called 'Baseline' for the regression values:
 ```python
-df = pd.DataFrame([{'Player':'A','Baseline':5},{'Player':'B','Baseline':8}])
-regression = smm2.Regression(to=df, n_games=33)
+df = pd.DataFrame([{'Team':'A','Baseline':-2},{'Team':'B','Baseline':5}])
+regression = nfl.Regression(to=df, n_games=16)
 ```
     
 In addition to (or instead of) regressing the values for individual PWR systems, you can choose to regress the final results after combining the various systems:
 ```python
-regression = smm2.Regression(n_games=12)
-systems = smm2.PWRsystems(regress_to=regression, srs=True, others=my_sys)
+regression = nfl.Regression(n_games=10)
+systems = nfl.PWRsystems(regress_to=regression, srs=True, dvoa=nfl.DVOA(weight=2))
 ```
 
 ##### Execution and Analysis
 
 Once you've set up your Simulate object, use run() to execute the simulation.
 ```python
-simulation = smm2.Simulate(n_sims=10000)
+regression = nfl.Regression(n_games=10)
+systems = nfl.PWRsystems(srs=nfl.SRS(regress_to=regression), fpi=True, dvoa=nfl.DVOA(weight=2))
+simulation = nfl.Simulate(season=2018, n_sims=10000, pwr_systems=systems)
 simulation.run()
 ```
     
 The run() method will return a reference to the Simulate object, so this syntax is also acceptable:
 ```python
-simulation = smm2.Simulate(n_sims=10000).run()
+simulation = nfl.Simulate(season=2018, n_sims=10000, pwr_systems=systems).run()
 ```
 
 By default, run() will use the joblib package to run the simulations in parallel; this can be overridden by setting parallel=False:
 ```python
-simulation = smm2.Simulate(n_sims=100).run(parallel=False)
+simulation = nfl.Simulate(season=2018, n_sims=100).run(parallel=False)
 ```
     
 Once the simulation has executed, the results are aggregated and stored in several related dataframes. These can either be directly accessed using the simulations property:
@@ -150,7 +150,7 @@ standings_reindexed = sim.standings(reindex=True)
 
 You can also entirely disable the generation of aggregated statistics, in which case the results are stored as a list of Simulation objects:
 ```python
-sim = smm2.Simulate(n_sims=100000).run(combine=False)
+sim = nfl.Simulate(season=2018, n_sims=100000).run(combine=False)
 for simulation in sim.simulations.values:
     rankings = simulation.rankings
     standings = simulation.standings
@@ -160,4 +160,11 @@ for simulation in sim.simulations.values:
 ```
 
 [//]: #
-   [PyPI]: <https://pypi.org/project/smm2sim/>
+   [PyPI]: <https://pypi.org/project/nflsim/>
+   [SRS]: <https://www.sports-reference.com/blog/2015/03/srs-calculation-details/>
+   [FPI]: <http://www.espn.com/blog/statsinfo/post/_/id/123048/a-guide-to-nfl-fpi/>
+   [DVOA]: <https://www.footballoutsiders.com/info/methods#DVOA>
+   [Sagarin]: <https://www.usatoday.com/sports/nfl/sagarin/2018/rating/>
+   [tiebreaking procedures]: <https://operations.nfl.com/the-rules/nfl-tiebreaking-procedures/>
+   [3 points by default]: <http://www.espn.com/nfl/story/_/id/20371914/home-field-advantage-nfl-2017-toughest-easiest-teams-play-road-more>
+   [13 points by default]: <https://www.pro-football-reference.com/about/win_prob.htm>
