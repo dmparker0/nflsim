@@ -66,6 +66,7 @@ You can also combine multiple systems. The weights for each system (default = 1)
 my_sys_df = pandas.DataFrame([{'Player':'A','Power':7},{'Player':'B','Power':5}])
 my_sys = smm2.PWR(weight=1, values=my_sys_df)
 systems = smm2.PWRsystems(srs=smm2.SRS(weight=2), others=my_sys)
+```
 
 To use multiple custom systems, pass a list of PWR objects instead of a single PWR object:
 ```python
