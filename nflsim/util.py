@@ -18,7 +18,7 @@ playoff_game_ids = {
     ('AFC', 3):('AFC','Divisional',1),('AFC', 4):('AFC','Divisional',2),
     ('NFC', 1):('NFC','Wild Card',1),('NFC', 2):('NFC','Wild Card',2),
     ('NFC', 3):('NFC','Divisional',1),('NFC', 4):('NFC','Divisional',2),
-    ('AFC', 5):('AFC','Championship',None),('NFC', 5):('NFC','Championship',None)}
+    ('AFC', 5):('AFC','Championship',1),('NFC', 5):('NFC','Championship',1)}
 
 def extractText(tosearch, delim_left='', delim_right= None,
                 reverse_left=False, reverse_right=False,
