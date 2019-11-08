@@ -78,7 +78,7 @@ class DVOA(PWR):
         PWR.__init__(self, weight, regress_to)
     
     def calculate(self, **kwargs):
-        url = 'https://www.footballoutsiders.com/stats/teameff' + str(kwargs['season'])
+        url = 'https://www.footballoutsiders.com/stats/teameff/' + str(kwargs['season'])
         html = BeautifulSoup(get(url).text, features='lxml')
         tbl = html.select('table[class*=stats]')[0]
         data = pd.read_html(str(tbl), header=0)[0].values.tolist()
