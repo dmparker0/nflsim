@@ -15,7 +15,7 @@ class Regression(object):
             reg_values = [self.regression_values] * df.shape[0]
             mydf = df
         else:
-            merged = pd.merge(self.regression_values, df, on='Team')
+            merged = df.merge(self.regression_values, on='Team')
             reg_values = merged['Baseline'].values
             mydf = merged
         if self.regression_weight is not None:
