@@ -99,12 +99,12 @@ class Simulation(object):
             results = {**results, **{(conference, i):x for i, x in bracket.items()}}
         results = dict((playoff_game_ids[key], value) for (key, value) in results.items())
         teams = teams.copy().index(name=True)
-        afc_champ = teams.values[results[('AFC','Championship',None)]['Winner']][0]
-        nfc_champ = teams.values[results[('NFC','Championship',None)]['Winner']][0]
+        afc_champ = teams.values[results[('AFC','Championship',1)]['Winner']][0]
+        nfc_champ = teams.values[results[('NFC','Championship',1)]['Winner']][0]
         result = simulateGame(afc_champ, nfc_champ, home_adj=0, st_dev=sim.st_dev)
-        results[(None,'Super Bowl',None)] = {'Winner':result['Winner'].name,'Loser':result['Loser'].name}
-        df = pd.DataFrame.from_dict(results, orient='index').rename_axis('Game').reset_index()
-        df[['Conference','Round','Game']] = pd.DataFrame(df['Game'].values.tolist(), index=df.index)
+        results[('NFL','Super Bowl',1)] = {'Winner':result['Winner'].name,'Loser':result['Loser'].name}
+        df = pd.DataFrame.from_dict(results, orient='index').reset_index()
+        df[['Conference','Round','Game']] = pd.DataFrame(df[['level_0','level_1','level_2']].values.tolist(), index=df.index)
         return df[['Conference','Round','Game','Winner','Loser']]
 
 class Simulations(object):
