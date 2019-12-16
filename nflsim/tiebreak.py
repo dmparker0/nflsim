@@ -39,6 +39,11 @@ def teamfilter(df, lst):
 def h2hfilter(df, lst):
     return teamfilter(df, lst) & df['Opponent'].isin(lst)
 
+def sweepfilter(df, lst):
+    x = h2hfilter(df, lst)
+    y = len(set(df[x]['Team'].values).union(set(df[x]['Opponent'].values))) == len(lst)
+    return x & y
+
 def divisionfilter(df, lst):
     return teamfilter(df, lst) & (df['Division'] == df['OppDivision'])
 
@@ -66,7 +71,7 @@ divsteps = [{'Filter':h2hfilter, 'Resolution':resolveWinPercentage},
             {'Filter':victoryfilter, 'Resolution':resolveScheduleStrength},
             {'Filter':teamfilter, 'Resolution':resolveScheduleStrength}]
 
-wcsteps  = [{'Filter':h2hfilter, 'Resolution':resolveH2HSweep},
+wcsteps  = [{'Filter':sweepfilter, 'Resolution':resolveH2HSweep},
             {'Filter':conferencefilter, 'Resolution':resolveWinPercentage},
             {'Filter':cgfilter_min4, 'Resolution':resolveWinPercentage},
             {'Filter':victoryfilter, 'Resolution':resolveScheduleStrength},
