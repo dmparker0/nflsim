@@ -65,11 +65,13 @@ class FPI(PWR):
         PWR.__init__(self, weight, regress_to)
         
     def calculate(self, **kwargs):
-        url = 'http://www.espn.com/nfl/story/_/page/Football-Power-Index/espn-nfl-football-power-index'
+        url = 'https://www.espn.com/nfl/fpi'
         html = BeautifulSoup(get(url).text, features='lxml')
-        tbl = html.select('article[data-id=Football-Power-Index] > div > div > aside > table')[0]
-        self.values = pd.DataFrame(pd.read_html(str(tbl))[0].values, columns=['Team','X','X','X','X','FPI'])[['Team','FPI']]
-        self.values['Team'] = [abbreviations[x.split()[1]] for x in self.values['Team'].values]
+        teams = [x.text for x in html.select('div[class*=FPI__Table] > div > table > tbody')[0].find_all('tr')]
+        table = html.select('div[class*=FPI__Table] > div > div > div > table > tbody')[0].find_all('tr')
+        vals = [{'Team':'Washington Football Team' if teams[i] == 'Washington' else teams[i],
+                 'FPI':float(row.find_all('td')[1].text)} for i, row in enumerate(table)]
+        self.values = pd.DataFrame(vals)
         self.pwrcol = 'FPI'
         return self
         
@@ -78,11 +80,11 @@ class DVOA(PWR):
         PWR.__init__(self, weight, regress_to)
     
     def calculate(self, **kwargs):
-        url = 'https://www.footballoutsiders.com/dvoa-ratings/2020/week-19-dvoa-ratings'
+        url = 'https://www.footballoutsiders.com/stats/nfl/team-efficiency/' + str(kwargs['season'])
         html = BeautifulSoup(get(url).text, features='lxml')
         tbl = html.select('table[class*=stats]')[0]
         data = pd.read_html(str(tbl), header=0)[0].values.tolist()
-        data = [[abbreviations[x[1]], float(x[2].replace('%',''))] for x in data if '%' in x[2]]
+        data = [[abbreviations[x[1]], float(x[4].replace('%',''))] for x in data if '%' in x[4]]
         self.values = pd.DataFrame(data, columns=['Team','DVOA'])
         self.pwrcol = 'DVOA'
         return self
@@ -103,7 +105,8 @@ class Sagarin(PWR):
         pattern = re.compile('([a-zA-Z ]+[ ])[=]([^a-zA-Z]*)')
         teamlist = []
         for (team, stats) in re.findall(pattern, tbltext):
-            teamlist.append({'Team':team.strip().replace('XXers','49ers'),'Sagarin':float(stats.split()[0])})
+            teamname = team.strip().replace('XXers','49ers').replace('Football','Football Team')
+            teamlist.append({'Team':teamname,'Sagarin':float(stats.split()[0])})
         self.values = pd.DataFrame(teamlist)
         self.pwrcol = 'Sagarin'
         return self
