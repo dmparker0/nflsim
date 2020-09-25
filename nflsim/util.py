@@ -7,7 +7,7 @@ abbreviations = {
     'KC' :'Kansas City Chiefs','LAC':'Los Angeles Chargers','LAR':'Los Angeles Rams',
     'MIA':'Miami Dolphins','MIN':'Minnesota Vikings','NE' :'New England Patriots',
     'NO' :'New Orleans Saints','NYG':'New York Giants','NYJ':'New York Jets',
-    'OAK':'Las Vegas Raiders','PHI':'Philadelphia Eagles','PIT':'Pittsburgh Steelers',
+    'OAK':'Oakland Raiders','PHI':'Philadelphia Eagles','PIT':'Pittsburgh Steelers',
     'SEA':'Seattle Seahawks','SF' :'San Francisco 49ers','TB' :'Tampa Bay Buccaneers',
     'TEN':'Tennessee Titans','WAS':'Washington Football Team','JAX':'Jacksonville Jaguars',
     'LARM':'Los Angeles Rams','LACH':'Los Angeles Chargers','SD':'San Diego Chargers',
