@@ -17,15 +17,15 @@ def simulateGamelog(gamelog, rankings, home_adj, st_dev, tie_fraction=0.0):
     merged['Away Wins'] = 1 - merged['Home Wins'].values
     return merged[['Home','Away','Home Wins','Away Wins']]
 
-def simulateBracket(teams, home_adj, st_dev, n_winners=1, home_game_list=None):
+def simulateBracket(teams, home_adj, st_dev, n_winners=1, home_game_list=None, bye_override=False):
     n_teams = teams.len()
-    n_byes = (1<<(n_teams-1).bit_length()) - n_teams
+    n_byes = 0 if bye_override else (1<<(n_teams-1).bit_length()) - n_teams
     remaining = teams
     results = {}
     gameid = 1
     if n_byes > 0:
         non_byes = [x[0] for i, x in teams.copy().index(seed=True).items() if i > n_byes]
-        results = simulateBracket(Teams(non_byes), home_adj, st_dev, (n_teams - n_byes)/2, home_game_list)
+        results = simulateBracket(Teams(non_byes), home_adj, st_dev, (n_teams - n_byes)/2, home_game_list, True)
         losers = pd.DataFrame.from_dict(results, orient='index')['Loser'].values
         remaining = Teams([x[0] for i, x in remaining.copy().index(name=True).items() if i not in losers])
         gameid = len(results) + 1
