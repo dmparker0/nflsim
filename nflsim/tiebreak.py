@@ -85,7 +85,7 @@ def getPlayoffSeeding(gamelog):
     for d, g in topteams.groupby('Division'):
         divwinners.add(breakDivisionalTie(gamelog, [{'Team':t,'Division':d} for t in g.index.get_level_values('Team').values]))
     remainingteams = set(gamelog['Team'].values) - divwinners
-    return pd.DataFrame(getSeeds(gamelog, ([1,2,3,4], [5,6]), (divwinners, remainingteams)))
+    return pd.DataFrame(getSeeds(gamelog, ([1,2,3,4], [5,6,7]), (divwinners, remainingteams)))
 
 def getSeeds(gamelog, seed_groups, winner_groups):
     wins = gamelog.groupby(['Team','Conference','Division'])['Wins'].sum()
