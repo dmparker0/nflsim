@@ -7,18 +7,18 @@ abbreviations = {
     'KC' :'Kansas City Chiefs','LAC':'Los Angeles Chargers','LAR':'Los Angeles Rams',
     'MIA':'Miami Dolphins','MIN':'Minnesota Vikings','NE' :'New England Patriots',
     'NO' :'New Orleans Saints','NYG':'New York Giants','NYJ':'New York Jets',
-    'OAK':'Oakland Raiders','PHI':'Philadelphia Eagles','PIT':'Pittsburgh Steelers',
+    'OAK':'Las Vegas Raiders','PHI':'Philadelphia Eagles','PIT':'Pittsburgh Steelers',
     'SEA':'Seattle Seahawks','SF' :'San Francisco 49ers','TB' :'Tampa Bay Buccaneers',
-    'TEN':'Tennessee Titans','WAS':'Washington Redskins','JAX':'Jacksonville Jaguars',
+    'TEN':'Tennessee Titans','WAS':'Washington Football Team','JAX':'Jacksonville Jaguars',
     'LARM':'Los Angeles Rams','LACH':'Los Angeles Chargers','SD':'San Diego Chargers',
-    'STL':'St. Louis Rams'}
+    'STL':'St. Louis Rams','LV':'Las Vegas Raiders'}
     
 playoff_game_ids = {
-    ('AFC', 1):('AFC','Wild Card',1),('AFC', 2):('AFC','Wild Card',2),
-    ('AFC', 3):('AFC','Divisional',1),('AFC', 4):('AFC','Divisional',2),
-    ('NFC', 1):('NFC','Wild Card',1),('NFC', 2):('NFC','Wild Card',2),
-    ('NFC', 3):('NFC','Divisional',1),('NFC', 4):('NFC','Divisional',2),
-    ('AFC', 5):('AFC','Championship',1),('NFC', 5):('NFC','Championship',1)}
+    ('AFC', 1):('AFC','Wild Card',1),('AFC', 2):('AFC','Wild Card',2),('AFC', 3):('AFC','Wild Card',3),
+    ('AFC', 4):('AFC','Divisional',1),('AFC', 5):('AFC','Divisional',2),
+    ('NFC', 1):('NFC','Wild Card',1),('NFC', 2):('NFC','Wild Card',2),('NFC', 3):('NFC','Wild Card',3),
+    ('NFC', 4):('NFC','Divisional',1),('NFC', 5):('NFC','Divisional',2),
+    ('AFC', 6):('AFC','Championship',1),('NFC', 6):('NFC','Championship',1)}
 
 def extractText(tosearch, delim_left='', delim_right= None,
                 reverse_left=False, reverse_right=False,
