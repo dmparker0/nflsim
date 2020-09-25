@@ -29,7 +29,7 @@ def getScores(year):
     df.columns = ['Week','Day','Date','Time','Winner','At','Loser','Box','PtsW','PtsL','Del','Del','Del','Del']
     df = df[df['Date'] != 'Playoffs']
     df = df[df['Week'].apply(lambda x: x.isnumeric())]
-    df = df[[x for x in list(df) if x not in ['Box','Del','Week','Day','Date','Time']]]
+    df = df[[x for x in list(df) if x not in ['Box','Del','Day','Date','Time']]]
     ishome = (df['At'].values != '@')
     df['Home'] = np.where(ishome, df['Winner'].values, df['Loser'].values)
     df['Away'] = np.where(ishome, df['Loser'].values, df['Winner'].values)
