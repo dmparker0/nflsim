@@ -78,11 +78,11 @@ class DVOA(PWR):
         PWR.__init__(self, weight, regress_to)
     
     def calculate(self, **kwargs):
-        url = 'https://www.footballoutsiders.com/stats/teameff/' + str(kwargs['season'])
+        url = 'https://www.footballoutsiders.com/dvoa-ratings/2020/week-19-dvoa-ratings'
         html = BeautifulSoup(get(url).text, features='lxml')
         tbl = html.select('table[class*=stats]')[0]
         data = pd.read_html(str(tbl), header=0)[0].values.tolist()
-        data = [[abbreviations[x[1]], float(x[4].replace('%',''))] for x in data if '%' in x[4]]
+        data = [[abbreviations[x[1]], float(x[2].replace('%',''))] for x in data if '%' in x[2]]
         self.values = pd.DataFrame(data, columns=['Team','DVOA'])
         self.pwrcol = 'DVOA'
         return self
