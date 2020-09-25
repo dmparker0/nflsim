@@ -1,4 +1,4 @@
-from pandas import DataFrame
+import pandas as pd
 from itertools import compress
 
 class Team(object):
@@ -11,7 +11,7 @@ class Team(object):
 
 class Teams(object):
     def __init__(self, values, indexed=False):
-        if type(values) is DataFrame:
+        if type(values) is pd.DataFrame:
             teamdict = values.to_dict('records')
             self.values = [Team(name=x['Team'], conf=x['Conference'], div=x['Division'], 
                                 pwr=x['PWR'], seed=x['Seed']) for x in teamdict]
